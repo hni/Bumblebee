@@ -18,7 +18,9 @@
  * along with Bumblebee. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <string.h>
 #include "../bblogger.h"
 #include "switching.h"
@@ -81,6 +83,14 @@ enum switch_state switch_off(void) {
     }
     bb_log(LOG_INFO, "Switching dedicated card OFF [%s]\n", switcher->name);
     switcher->off();
+
+    if (remove("/dev/nvidia0") == -1) {
+        bb_log(LOG_WARNING, "Could not delete /dev/nvidia0: %s\n", strerror(errno));
+    }
+    if (remove("/dev/nvidiactl") == -1) {
+        bb_log(LOG_WARNING, "Could not delete /dev/nvidiactl: %s\n", strerror(errno));
+    }
+
     return switcher->status();
   }
   return SWITCH_UNAVAIL;
